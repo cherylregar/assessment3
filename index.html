@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Tubes Web</title>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link href="https://fonts.googleapis.com/css?family=Poppins" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+
+        .form-column {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .form-column label {
+            flex-basis: 30%;
+        }
+
+        .form-column input {
+            flex-basis: 70%;
+        }
+
+        .form-row {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .form-row button {
+            flex-basis: 30%;
+        }
+
+        #data-table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+
+        #data-table th,
+        #data-table td {
+            padding: 8px;
+            border: 1px solid #ccc;
+        }
+
+        #data-table th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Data Tubes Web</h1>
+    <table id="data-table">
+        <thead>
+            <tr>
+                <th>ID Kursus</th>
+                <th>Nama Kursus</th>
+                <th>Nama Pengajar</th>
+                <th>Durasi Video</th>
+                <th>Jumlah Modul</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <h2>Tambah Data</h2>
+    <form id="add-form" class="form-column">
+        <div class="form-row">
+            <label for="idkursus">ID Kursus:</label>
+            <input type="text" name="idkursus" required>
+        </div>
+        <div class="form-row">
+            <label for="nm_kursus">Nama Kursus:</label>
+            <input type="text" name="nm_kursus" required>
+        </div>
+        <div class="form-row">
+            <label for="nm_pengajar">Nama Pengajar:</label>
+            <input type="text" name="nm_pengajar" required>
+        </div>
+        <div class="form-row">
+            <label for="durasi_video">Durasi Video:</label>
+            <input type="text" name="durasi_video" required>
+        </div>
+        <div class="form-row">
+            <label for="jumlah_modul">Jumlah Modul:</label>
+            <input type="text" name="jumlah_modul" required>
+        </div>
+        <div class="form-row">
+            <button type="submit">Tambah</button>
+        </div>
+    </form>
+
+    <h2>Update Data</h2>
+    <form id="update-form" class="form-column">
+        <div class="form-row">
+            <label for="idkursus-update">ID Kursus:</label>
+            <input type="text" name="idkursus-update" required>
+        </div>
+        <div class="form-row">
+            <label for="nm_kursus-update">Nama Kursus:</label>
+            <input type="text" name="nm_kursus-update" required>
+        </div>
+        <div class="form-row">
+            <label for="nm_pengajar-update">Nama Pengajar:</label>
+            <input type="text" name="nm_pengajar-update" required>
+        </div>
+        <div class="form-row">
+            <label for="durasi_video-update">Durasi Video:</label>
+            <input type="text" name="durasi_video-update" required>
+        </div>
+        <div class="form-row">
+            <label for="jumlah_modul-update">Jumlah Modul:</label>
+            <input type="text" name="jumlah_modul-update" required>
+        </div>
+        <div class="form-row">
+            <button type="submit">Update</button>
+        </div>
+    </form>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Load data to DataTable
+            $('#data-table').DataTable({
+                "ajax": {
+                    "url": "api.php",
+                    "type": "GET",
+                    "dataSrc": ""
+                },
+                "columns": [
+                    { "data": "idkursus" },
+                    { "data": "nm_kursus" },
+                    { "data": "nm_pengajar" },
+                    { "data": "durasi_video" },
+                    { "data": "jumlah_modul" },
+                    {
+                        "data": null,
+                        "render": function (data, type, row) {
+                            return '<button class="update-btn" data-id="' + row.idkursus + '">Update</button>' +
+                                '<button class="delete-btn" data-id="' + row.idkursus + '">Delete</button>';
+                        }
+                    }
+                ]
+            });
+
+            // Handle form submission for adding data
+            $("#add-form").submit(function (event) {
+                event.preventDefault();
+                if ($(this).valid()) {
+                    var data = $(this).serialize();
+                    $.ajax({
+                        url: "api.php",
+                        type: "POST",
+                        data: data,
+                        success: function (response) {
+                            if (response.status === "berhasil") {
+                                alert("Data berhasil ditambahkan");
+                                $('#data-table').DataTable().ajax.reload();
+                                $("#add-form")[0].reset();
+                            } else {
+                                alert("Data gagal ditambahkan");
+                            }
+                        }
+                    });
+                }
+            });
+
+            // Handle form submission for updating data
+            $("#update-form").submit(function (event) {
+                event.preventDefault();
+                if ($(this).valid()) {
+                    var data = $(this).serialize();
+                    $.ajax({
+                        url: "api.php",
+                        type: "PUT",
+                        data: data,
+                        success: function (response) {
+                            if (response.status === "berhasil") {
+                                alert("Data berhasil diupdate");
+                                $('#data-table').DataTable().ajax.reload();
+                                $("#update-form")[0].reset();
+                            } else {
+                                alert("Data gagal diupdate");
+                            }
+                        }
+                    });
+                }
+            });
+
+            // Handle delete button click
+            $(document).on('click', '.delete-btn', function () {
+                var id = $(this).data('id');
+                if (confirm("Apakah Anda yakin ingin menghapus data ini?")) {
+                    $.ajax({
+                        url: "api.php?id=" + id,
+                        type: "DELETE",
+                        success: function (response) {
+                            if (response.status === "berhasil") {
+                                alert("Data berhasil dihapus");
+                                $('#data-table').DataTable().ajax.reload();
+                            } else {
+                                alert("Data gagal dihapus");
+                            }
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
